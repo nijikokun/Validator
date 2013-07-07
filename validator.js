@@ -1,10 +1,6 @@
-// Developed By Nijiko Yonskai
+// Validator.js - v3 - Developed By Nijiko Yonskai
 // JSON Schema Validator for API w/ a middleware for express
 // Copyright 2013
-//
-// Made this in a rush, it could probably be cleaned up to be more extensible.
-// Just wanted it to do basic things like required, length, and matches.
-// Had in mind to develop a replacement system as well.
 var Validator = function (schema, middleware) {
   this.schema = schema;
   this.parameters = Object.keys(this.schema);
@@ -12,6 +8,16 @@ var Validator = function (schema, middleware) {
   this.retrieved = {};
   
   if (middleware) return this.middleware;
+};
+
+// Plugin System
+Validator.plugins = {};
+
+Validator.implement = function (field, callback) {
+  Validator.plugins[field] = function (details, key, data) {
+    callback.call(this, details, key, data);
+    return this.checkErrors();
+  };
 };
 
 // Validator init methods
@@ -47,7 +53,7 @@ Validator.prototype.roundup = function () {
   });
 };
 
-// Validation methods
+// Validation
 Validator.prototype.validate = function () {
   // Retrieve the data initially
   this.roundup();
@@ -56,48 +62,17 @@ Validator.prototype.validate = function () {
   // Loop through validations for each key
   if (this.loop(function (key, data) {
     var details = this.schema[key];
-  console.log(details);
-    if (details.type) if (this.validate.type.call(this, details, key, data)) return this.errors;
-    if (details.length) if (this.validate.lengths.call(this, details, key, data)) return this.errors;
-    if (details.match) if (this.validate.matches.call(this, details, key, data)) return this.errors;
-  })) return this.errors;
-
-  return this.retrieved;
-};
-
-Validator.prototype.validate.type = function (details, key, data) {
-  if (Object.prototype.toString.call(data) !== "[object " + details.type + "]")
-    this.error(key, "type", "Invalid parameter data type, expected: " + details.type);
-
-  return this.checkErrors();
-};
-        
-Validator.prototype.validate.lengths = function (details, key, data) {
-  if (typeof details.length === "object")
-    if (details.length.min) 
-      if (details.length.min > data.length) this.error(key, "min", "Must be at least " + details.length.min + " characters long.");
-    if (details.length.max) 
-      if (details.length.max < data.length) this.error(key, "max", "Must be less than " + details.length.max + " characters long.");
-  else if (typeof details.length === "number")
-    if (details.length != data.length)
-      this.error(key, "length", "Must be " + details.length + " characters long.");
-
-  return this.checkErrors();
-};
-
-Validator.prototype.validate.matches = function (details, key, data) {
-  if (Object.prototype.toString.call(details.match) === "[object Array]") {
-    var i = 0, regex;
-
-    for (i; i < details.match.length; i++) {
-      regex = details.match[i];
-      if (!regex.test(data.toString()))
-        this.error(key, "match-" + i, "Parameter data did not pass regex test.");
+    var fields = Object.keys(details), field, i = 0;
+    for (i; i < fields.length; i++) {
+      field = fields[i];
+  
+      if (Validator.plugins[field])
+        if (Validator.plugins[field].call(this, details, key, data))
+          return this.errors;
     }
-  } else if (details.match.test(data.toString()) === false)
-  this.error(key, "match", "Parameter data did not pass regex test.");
-
-  return this.checkErrors();
+  })) return this.errors;
+  
+  return this.retrieved;
 };
 
 // Error Management
@@ -121,3 +96,33 @@ Validator.prototype.loop = function (callback) {
     return callback.call(this, key, data);
   }
 };
+
+// Implementations
+Validator.implement("type", function (details, key, data) {
+  if (Object.prototype.toString.call(data) !== "[object " + details.type + "]")
+    this.error(key, "type", "Invalid parameter data type, expected: " + details.type);
+});
+        
+Validator.implement("length", function (details, key, data) {
+  if (typeof details.length === "object")
+    if (details.length.min) 
+      if (details.length.min > data.length) this.error(key, "min", "Must be at least " + details.length.min + " characters long.");
+    if (details.length.max) 
+      if (details.length.max < data.length) this.error(key, "max", "Must be less than " + details.length.max + " characters long.");
+  else if (typeof details.length === "number")
+    if (details.length != data.length)
+      this.error(key, "length", "Must be " + details.length + " characters long.");
+});
+
+Validator.implement("test", function (details, key, data) {
+  if (Object.prototype.toString.call(details.test) === "[object Array]") {
+    var i = 0, regex;
+
+    for (i; i < details.test.length; i++) {
+      regex = details.test[i];
+      if (!regex.test(data.toString()))
+        this.error(key, "test-" + i, "Parameter data did not pass regex test.");
+    }
+  } else if (details.test.test(data.toString()) === false)
+    this.error(key, "test", "Parameter data did not pass regex test.");
+});

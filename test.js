@@ -12,7 +12,7 @@ var schema = {
       min: 3,
       max: 36
     },
-    match: /^[a-z0-9]+$/gi
+    test: /^[a-z0-9]+$/gi
   }
 };
 
