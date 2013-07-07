@@ -10,7 +10,7 @@ var schema = {
       min: 3,
       max: 36
     },
-    match: /[a-z0-9]/gi
+    match: /^[a-z0-9]+$/gi
   }
 };
 
@@ -36,10 +36,10 @@ var req = new system({
 var Validator = function (schema, middleware) {
   this.schema = schema;
   this.parameters = Object.keys(this.schema);
-  this.errors = { _error: true };
+  this.errors = { };
   this.retrieved = {};
   
-  if (middleware) return validator.middleware;
+  if (middleware) return this.middleware;
 };
 
 // Validator init methods
@@ -70,7 +70,7 @@ Validator.prototype.roundup = function () {
       if (data = this.param(key))
         this.retrieved[key] = data;
       else if (this.schema[key].required)
-        this.error(key, "This parameter is required.");
+        this.error(key, "required", "This parameter is required.");
     }
   });
 };
@@ -84,6 +84,7 @@ Validator.prototype.validate = function () {
   // Loop through validations for each key
   if (this.loop(function (key, data) {
     var details = this.schema[key];
+  console.log(details);
     if (details.type) if (this.validate.type.call(this, details, key, data)) return this.errors;
     if (details.length) if (this.validate.lengths.call(this, details, key, data)) return this.errors;
     if (details.match) if (this.validate.matches.call(this, details, key, data)) return this.errors;
@@ -94,42 +95,44 @@ Validator.prototype.validate = function () {
 
 Validator.prototype.validate.type = function (details, key, data) {
   if (Object.prototype.toString.call(data) !== "[object " + details.type + "]")
-    this.error(key, "Invalid parameter data type, expected: " + details.type);
+    this.error(key, "type", "Invalid parameter data type, expected: " + details.type);
 
   return this.checkErrors();
 };
-
+        
 Validator.prototype.validate.lengths = function (details, key, data) {
   if (typeof details.length === "object")
     if (details.length.min) 
-      if (details.length.min > data.length) this.error(key, "Must be at least " + details.length.min + " characters long.");
+      if (details.length.min > data.length) this.error(key, "min", "Must be at least " + details.length.min + " characters long.");
     if (details.length.max) 
-      if (details.length.max < data.length) this.error(key, "Must be less than " + details.length.max + " characters long.");
+      if (details.length.max < data.length) this.error(key, "max", "Must be less than " + details.length.max + " characters long.");
   else if (typeof details.length === "number")
     if (details.length != data.length)
-      this.error(key, "Must be " + details.length + " characters long.");
+      this.error(key, "length", "Must be " + details.length + " characters long.");
 
   return this.checkErrors();
 };
 
 Validator.prototype.validate.matches = function (details, key, data) {
-  if (typeof details.match === "object") {
+  if (Object.prototype.toString.call(details.match) === "[object Array]") {
     var i = 0, regex;
 
     for (i; i < details.match.length; i++) {
       regex = details.match[i];
       if (!regex.test(data.toString()))
-        this.error(key, "Recieved data did not match regex test: " + regex.toString());
+        this.error(key, "match-" + i, "Parameter data did not pass regex test.");
     }
-  }
+  } else if (details.match.test(data.toString()) === false)
+  this.error(key, "match", "Parameter data did not pass regex test.");
 
   return this.checkErrors();
 };
 
 // Error Management
-Validator.prototype.error = function (key, message) {
-  if (!this.errors[key]) this.errors[key] = [];
-  this.errors[key].push({ message: message });
+Validator.prototype.error = function (key, type, message) {
+  if (!this.errors._error) this.errors._error = true;
+  if (!this.errors[key]) this.errors[key] = {};
+  this.errors[key][type] = { message: message };
 };
 
 Validator.prototype.checkErrors = function () {
