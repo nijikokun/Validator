@@ -5,6 +5,7 @@ Barebones schema validation library for things such as database schemas, api dat
 ### Extensions
 
 - Requirement (built-in)
+- Type - uses `Object.prototype.toString.call` so make sure you use `String`, `Number`, `Boolean`... etc.
 - Length - By itself it must be this long, otherwise as an object supports the following:
   - Min
   - Max
