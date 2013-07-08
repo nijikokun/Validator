@@ -10,7 +10,7 @@ $ npm install schema-validator
 
 For browsers, download and include the script `validator.js` just as you would jquery or another script.
 
-### Extensions
+### Implementations
 
 - Requirement (built-in)
 - Type - uses `Object.prototype.toString.call` so make sure you use `String`, `Number`, `Boolean`... etc.
@@ -19,6 +19,50 @@ For browsers, download and include the script `validator.js` just as you would j
   - Max
 - Test (Regular expression tests)
   - Supports an array of RegExps as well.
+
+#### Usage
+
+You create a JSON Schema, where `username` is a field, and each key:value inside of it is an implementation in validator.
+
+```javascript
+var schema = {
+  username: {
+    type: "String",
+    required: true,
+    length: {
+      min: 3,
+      max: 36
+    },
+    test: /^[a-z0-9]+$/gi
+  }
+};
+```
+
+Setup a `new Validator` against your schema:
+
+```javascript
+var validator = new Validator(schema);
+```
+
+Now we validate against some given information:
+
+```javascript
+var check = validator.check({
+  username: "Niji%kokun"
+});
+
+console.log(check);
+```
+
+##### Express Middleware Style:
+
+Schema data will be put on the request object, `req.validated`, as an `Object` containing field : data information.
+
+```javascript
+app.get('api/user/add', [ new Validator(schema.user, true) ], function (req, res) {
+  res.send(200, req.validated);
+});
+```
 
 #### Creating an extension
 
