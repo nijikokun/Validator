@@ -103,13 +103,13 @@ After your implementation has been ran, the validator will check for errors, if 
 
 ### Todo
 
-- [x] Make extensibility easier.
-- [x] Move over to github repository.
-- [x] Make implementations use an object as an argument rather than multiple arguments.
-- [ ] Break up implementations into their own folder and make a compiler.
+- ~~Make extensibility easier.~~
+- ~~Move over to github repository.~~
+- ~~Make implementations use an object as an argument rather than multiple arguments.~~
+- Break up implementations into their own folder and make a compiler.
 
 Futuristic / Unfeasible
-- [ ] Find a way to show how to do unique without requiring hassle of setup.
+- Find a way to show how to do unique without requiring hassle of setup.
   - Essentially you connect in your database and get the collection and check against the key.
   - It's not that hard but there are thousands of databases and ways people do things...
 
