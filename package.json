@@ -1,0 +1,27 @@
+{
+  "name": "schema-validator",
+  "version": "3.1.0",
+  "description": "JSON Schema validation library for JavaScript / Node / Express.",
+  "main": "validator.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Nijikokun/Validator.git"
+  },
+  "keywords": [
+    "validator",
+    "validation",
+    "schema",
+    "json",
+    "required",
+    "length",
+    "test",
+    "regexp",
+    "scheme"
+  ],
+  "author": "Nijiko Yonskai",
+  "license": "MIT",
+  "readmeFilename": "readme.md"
+}

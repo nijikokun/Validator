@@ -2,6 +2,14 @@
 
 Barebones schema validation library for things such as database schemas, api data schemas, etc.
 
+### Install
+
+```bash
+$ npm install schema-validator
+```
+
+For browsers, download and include the script `validator.js` just as you would jquery or another script.
+
 ### Extensions
 
 - Requirement (built-in)
@@ -27,8 +35,9 @@ After your implementation has been ran, the validator will check for errors, if 
 ### Todo
 
 - ~~Make extensibility easier.~~
-- Make implementations use an object as an argument rather than multiple arguments to allow for further expansion.
-- Move over to github repository.
+- ~~Move over to github repository.~~
+- Make implementations use an object as an argument rather than multiple arguments.
+  - Allowing for further expansion / extensibility.
 
 ### Changelog
 
