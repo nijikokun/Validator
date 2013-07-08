@@ -31,6 +31,10 @@ After your implementation has been ran, the validator will check for errors, if 
 
 ### Changelog
 
+Version 3.1
+  - Extended comments
+  - Implemented module exporting for various platforms.
+
 Version 3
   - Remove console logging
   - Implement plugin system - `.implement` method
