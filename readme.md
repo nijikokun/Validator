@@ -26,7 +26,8 @@ After your implementation has been ran, the validator will check for errors, if 
 
 ### Todo
 
-- <s>Make extensibility easier.</s>
+- ~~Make extensibility easier.~~
+- Make implementations use an object as an argument rather than multiple arguments to allow for further expansion.
 - Move over to github repository.
 
 ### Changelog
