@@ -1,7 +1,4 @@
-// Validator.js - v3 - Developed By Nijiko Yonskai
-// JSON Schema Validator for API w/ a middleware for express
-// Copyright 2013
-// Validator.js - v3.1
+// Validator.js - v3.2
 // 
 // JSON Schema Validator for API w/ a middleware for express
 // Developed by Nijiko Yonskai <nijikokun@gmail.com>
@@ -20,7 +17,23 @@ Validator.plugins = {};
 
 Validator.implement = function (field, callback) {
   Validator.plugins[field] = function (details, key, data) {
-    callback.call(this, details, key, data);
+    var $this = this;
+
+    callback.call(this, { 
+      details: details,
+      field: field,
+      value: details[field], 
+      key: key,
+      data: data,
+      error: function (type, message) {
+        if (typeof message === 'undefined') 
+          message = type,
+          type = undefined;
+
+        $this.error(key, type || field, message);
+      }
+    });
+
     return this.checkErrors();
   };
 };
@@ -119,9 +132,9 @@ Validator.prototype.loop = function (callback) {
 //
 // Checks against `Object.prototype.toString.call` for exact type rather than `typeof`.
 // By doing so it requires that the field starts with a capitol letter such as: `String`.
-Validator.implement("type", function (details, key, data) {
-  if (Object.prototype.toString.call(data) !== "[object " + details.type + "]")
-    this.error(key, "type", "Invalid parameter data type, expected: " + details.type);
+Validator.implement("type", function (options) {
+  if (Object.prototype.toString.call(options.data) !== "[object " + options.value + "]")
+    options.error("Invalid parameter data type, expected: " + options.value);
 });
 
 // Validator Implementation
@@ -132,15 +145,17 @@ Validator.implement("type", function (details, key, data) {
 //
 // Checks given data length against a numerical value, when the field is an object we check against
 // the `min` and `max` values. If the field is simply a numeric value we check for equality.
-Validator.implement("length", function (details, key, data) {
-  if (typeof details.length === "object")
-    if (details.length.min) 
-      if (details.length.min > data.length) this.error(key, "min", "Must be at least " + details.length.min + " characters long.");
-    if (details.length.max) 
-      if (details.length.max < data.length) this.error(key, "max", "Must be less than " + details.length.max + " characters long.");
-  else if (typeof details.length === "number")
-    if (details.length != data.length)
-      this.error(key, "length", "Must be " + details.length + " characters long.");
+Validator.implement("length", function (options) {
+  if (typeof options.value === "object")
+    if (options.value.min) 
+      if (options.value.min > options.data.length) 
+        options.error("min", "Must be greater than " + options.value.min + " characters long.");
+    if (options.value.max) 
+      if (options.value.max < options.data.length) 
+        options.error("max", "Must be less than " + options.value.max + " characters long.");
+  else if (typeof options.value === "number")
+    if (options.value != options.data.length)
+      options.error("Must be " + options.value + " characters long.");
 });
 
 // Validator Implementation
@@ -150,17 +165,17 @@ Validator.implement("length", function (details, key, data) {
 // Supports: `RegExp` or `Array` of `RegExp`
 //
 // Checks given data against a single `RegExp` using `.test` or an `Array` of `RegExp` using `.test`
-Validator.implement("test", function (details, key, data) {
-  if (Object.prototype.toString.call(details.test) === "[object Array]") {
+Validator.implement("test", function (options) {
+  if (Object.prototype.toString.call(options.value) === "[object Array]") {
     var i = 0, regex;
 
-    for (i; i < details.test.length; i++) {
-      regex = details.test[i];
-      if (!regex.test(data.toString()))
-        this.error(key, "test-" + i, "Parameter data did not pass regex test.");
+    for (i; i < options.value.length; i++) {
+      regex = options.value[i];
+      if (!regex.test(options.data.toString()))
+        options.error("test-" + i, "Parameter data did not pass regex test.");
     }
-  } else if (details.test.test(data.toString()) === false)
-    this.error(key, "test", "Parameter data did not pass regex test.");
+  } else if (options.value.test(options.data.toString()) === false)
+    options.error("Parameter data did not pass regex test.");
 });
 
 // Export our module

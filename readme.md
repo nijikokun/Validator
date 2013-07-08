@@ -64,13 +64,38 @@ app.get('api/user/add', [ new Validator(schema.user, true) ], function (req, res
 });
 ```
 
-#### Creating an extension
-
-Implementing a feature into Validator is easy, you set the field and a callback, the callback gives you three items of data `details` (the whole schema, and your field is included so you can do cross checks if needed), `key` (the name of the parameter), `data` (retrieved parameter data from external source, you check against this).
+or
 
 ```javascript
-Validator.implement("field", function (details, key, data) {
-  this.error(key, "error-field", "No check has been done against this key!");
+app.get('api/user/add', [ (new Validator(schema.user)).middleware ], function (req, res) {
+  res.send(200, req.validated);
+});
+```
+
+#### Creating an extension
+
+Implementing a feature into Validator is easy, you set the field and a callback.
+
+The callback supports a single argument `options` which contains valuable information.
+  - `field` - The field implementation that is being checked.
+  - `key` - The schema field being checked.
+  - `data` - The data passed from an external source.
+  - `value` - The field implementation data value.
+  - `error` - Sugar method for `this.error` which was previously used.
+    - `type` - optional argument, it's the error field for the message given. Default is `field`.
+    - `message` - Error message.
+
+```javascript
+Validator.implement("field", function (options) {
+  if (options.data) {
+    options.error("Data exists, this is wrong... or right! I don't know!");
+  }
+
+  // If you couldn't tell this gives an error back to the validator
+  options.error("No check has been done against this key!");
+
+  // and you can set custom field name for the error message object
+  options.error("error-field", "This field hasn't been checked yet!");
 });
 ```
 
