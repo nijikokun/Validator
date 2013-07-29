@@ -1,4 +1,4 @@
-# Validator JS
+# Schema Validation for JavaScript
 
 Barebones schema validation library for things such as database schemas, api data schemas, etc.
 
