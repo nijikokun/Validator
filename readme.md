@@ -44,7 +44,7 @@ Setup a `new Validator` against your schema:
 var validator = new Validator(schema);
 ```
 
-~~~
+---
 
 **Note** there is also debugging support you can enable by adding the following line:
 
@@ -52,7 +52,7 @@ var validator = new Validator(schema);
 validator.debug = true;
 ```
 
-~~~
+---
 
 Now we validate against some given information:
 
