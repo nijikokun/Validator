@@ -2,7 +2,7 @@
 // JSON Schema Validator for API w/ a middleware for express
 // Copyright 2013
 
-// Requires validator.js
+var Validator = require('./validator');
 
 var schema = {
   username: {
@@ -13,6 +13,10 @@ var schema = {
       max: 36
     },
     test: /^[a-z0-9]+$/gi
+  },
+  password: {
+    type: String,
+    required: true
   }
 };
 
@@ -27,12 +31,33 @@ system.prototype.param = function (item) {
 
 system.route = function (req, res) {
   var validator = new Validator(schema);
-  console.log(validator.check(req));
+  console.log(req.param('message'), validator.check(req.param('user')));
 };
 
-// Impersonate Express.js req
-var req = new system({
-  username: 'Niji%kokun'
-});
+// Impersonate requests
 
-system.route(req);
+// This should pass
+system.route(new system({
+  message: 'Should pass:',
+  user: {
+    username: 'Nijikokun',
+    password: 'password'
+  }
+}));
+
+// This should not pass due to missing password
+system.route(new system({
+  message: 'Should fail:',
+  user: {
+    username: 'Niji%kokun'
+  }
+}));
+
+// This should not pass due to invalid username
+system.route(new system({
+  message: 'Should fail:',
+  user: {
+    username: 'Niji%kokun',
+    password: 'password'
+  }
+}));

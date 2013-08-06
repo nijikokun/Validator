@@ -67,7 +67,7 @@ Validator.prototype.param = function (key) {
 // Gathers all sent data either through a request, or given explicitly,
 // for fields that exist inside of the current schema.
 Validator.prototype.roundup = function () {
-  this.loop(function (key, data) {
+  return this.loop(function (key, data) {
     if (this.schema[key]) {
       if (data = this.param(key))
         this.retrieved[key] = data;
@@ -80,10 +80,8 @@ Validator.prototype.roundup = function () {
 // Validation
 Validator.prototype.validate = function () {
   // Retrieve the data initially
-  this.roundup();
-
   // Check for errors after initial fetching.
-  if (this.checkErrors()) return this.errors;
+  if (this.roundup()) return this.errors;
 
   // Loop through validations for each key
   if (this.loop(function (key, data) {
@@ -122,17 +120,27 @@ Validator.prototype.loop = function (callback) {
   for (i; i < this.parameters.length; i++) {
     key = this.parameters[i];
     data = this.retrieved[key];
-    return callback.call(this, key, data);
+    callback.call(this, key, data);
   }
+
+  // Clear stored data
+  key = data = i = null;
+
+  // Check errors
+  return this.checkErrors();
 };
 
 // Validator Implementation
 //
 // Field: `type`
 //
+// Checks whether value is function to support using native words.
 // Checks against `Object.prototype.toString.call` for exact type rather than `typeof`.
 // By doing so it requires that the field starts with a capitol letter such as: `String`.
 Validator.implement("type", function (options) {
+  if (typeof options.value === 'function')
+    options.value = options.value.name;
+
   if (Object.prototype.toString.call(options.data) !== "[object " + options.value + "]")
     options.error("Invalid parameter data type, expected: " + options.value);
 });
