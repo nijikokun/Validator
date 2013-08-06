@@ -115,6 +115,14 @@ Futuristic / Unfeasible
 
 ### Changelog
 
+Version 3.2
+  - Fixed test, now can be run with node
+  - Fixed length for Numbers with extended support for Arrays
+  - Fixed loop issue where only one value was returned
+  - Implemented support for natives no longer need to use strings for types
+    - `Function`, `String`... are supported, check password.type in test for more information.
+  - Simplified roundup.
+
 Version 3.1
   - Extended comments
   - Implemented module exporting for various platforms.
