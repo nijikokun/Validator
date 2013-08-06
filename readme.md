@@ -121,6 +121,7 @@ Version 3.2
   - Fixed loop issue where only one value was returned
   - Implemented support for natives no longer need to use strings for types
     - `Function`, `String`... are supported, check password.type in test for more information.
+  - Implemented `debug` feature for showing value of fields along with error messages.
   - Simplified roundup.
 
 Version 3.1
