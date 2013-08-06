@@ -27,7 +27,7 @@ You create a JSON Schema, where `username` is a field, and each key:value inside
 ```javascript
 var schema = {
   username: {
-    type: "String",
+    type: String,
     required: true,
     length: {
       min: 3,
@@ -43,6 +43,16 @@ Setup a `new Validator` against your schema:
 ```javascript
 var validator = new Validator(schema);
 ```
+
+~~~
+
+**Note** there is also debugging support you can enable by adding the following line:
+
+```javascript
+validator.debug = true;
+```
+
+~~~
 
 Now we validate against some given information:
 
