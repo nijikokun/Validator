@@ -8,6 +8,7 @@ var Validator = function (schema, middleware) {
   this.parameters = Object.keys(this.schema);
   this.errors = { };
   this.retrieved = {};
+  this.debug = false;
   
   if (middleware) return this.middleware;
 };
@@ -17,9 +18,8 @@ Validator.plugins = {};
 
 Validator.implement = function (field, callback) {
   Validator.plugins[field] = function (details, key, data) {
-    var $this = this;
-
-    callback.call(this, { 
+    var $this = this
+      , option = { 
       details: details,
       field: field,
       value: details[field], 
@@ -30,9 +30,11 @@ Validator.implement = function (field, callback) {
           message = type,
           type = undefined;
 
-        $this.error(key, type || field, message);
+        $this.error(key, type || field, message, option);
       }
-    });
+    };
+
+    callback.call(this, option);
 
     return this.checkErrors();
   };
@@ -100,10 +102,13 @@ Validator.prototype.validate = function () {
 };
 
 // Error Management
-Validator.prototype.error = function (key, type, message) {
+Validator.prototype.error = function (key, type, message, option) {
   if (!this.errors._error) this.errors._error = true;
   if (!this.errors[key]) this.errors[key] = {};
   this.errors[key][type] = { message: message };
+
+  if (option && this.debug && typeof option.data !== "undefined")
+    this.errors[key][type].value = option.data;
 };
 
 Validator.prototype.checkErrors = function () {
@@ -154,15 +159,21 @@ Validator.implement("type", function (options) {
 // Checks given data length against a numerical value, when the field is an object we check against
 // the `min` and `max` values. If the field is simply a numeric value we check for equality.
 Validator.implement("length", function (options) {
+  if (typeof options.data === "undefined") return;
+
+  // Check whether length exists, otherwise use value
+  options.against = options.data.length ? options.data.length : options.data;
+
+  // Do Checks
   if (typeof options.value === "object")
     if (options.value.min) 
-      if (options.value.min > options.data.length) 
-        options.error("min", "Must be greater than " + options.value.min + " characters long.");
+      if (options.value.min > options.against) 
+        options.error("min", "Must be greater than " + options.value.min + (options.data.type === "string" ? " characters long." : ""));
     if (options.value.max) 
-      if (options.value.max < options.data.length) 
-        options.error("max", "Must be less than " + options.value.max + " characters long.");
+      if (options.value.max < options.against) 
+        options.error("max", "Must be less than " + options.value.max + (options.data.type === "string" ? " characters long." : ""));
   else if (typeof options.value === "number")
-    if (options.value != options.data.length)
+    if (options.value != options.against)
       options.error("Must be " + options.value + " characters long.");
 });
 
@@ -178,12 +189,13 @@ Validator.implement("test", function (options) {
     var i = 0, regex;
 
     for (i; i < options.value.length; i++) {
-      regex = options.value[i];
-      if (!regex.test(options.data.toString()))
+      if (!options.value[i].test(options.data.toString()))
         options.error("test-" + i, "Parameter data did not pass regex test.");
     }
-  } else if (options.value.test(options.data.toString()) === false)
-    options.error("Parameter data did not pass regex test.");
+  } else {
+    if (!options.value.test(options.data))
+      options.error("Parameter data did not pass regex test.");
+  }
 });
 
 // Export our module
