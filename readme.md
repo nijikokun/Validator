@@ -66,6 +66,35 @@ var check = validator.check({
 console.log(check);
 ```
 
+##### Nesting
+
+Nesting is supported, it's currently in a testing phase, as seen in the test file:
+
+```javascript
+  belt: {
+    type: Object,
+    required: true,
+    
+    team: {
+      type: Array,
+      required: true,
+      length: {
+        min: 1,
+        max: 6
+      }
+    },
+
+    inventory: {
+      type: Array,
+      default: [],
+      length: {
+        max: 255
+      }
+    }
+  }
+```
+
+
 ##### Express Middleware Style:
 
 Schema data will be put on the request object, `req.validated`, as an `Object` containing field : data information.
@@ -118,7 +147,9 @@ After your implementation has been ran, the validator will check for errors, if 
 - ~~Make extensibility easier.~~
 - ~~Move over to github repository.~~
 - ~~Make implementations use an object as an argument rather than multiple arguments.~~
-- Implement nesting feature. Might be useful, I personally can't see one... let me know in issues if you can.
+- ~~Implement nesting feature. Might be useful, I personally can't see one... let me know in issues if you can.~~
+- Implement check for Array values.
+- Implement support for wildcard, it could be useful to work with all fields that aren't plugins under one object.
 - Break up implementations into their own folder and make a compiler.
 
 Futuristic / Unfeasible
@@ -127,6 +158,10 @@ Futuristic / Unfeasible
   - It's not that hard but there are thousands of databases and ways people do things...
 
 ### Changelog
+
+Version 3.2.2
+  - Implemented `nesting` abilities.
+    - I think the current implementation is fairly quick, but I feel there is a faster way using references.
 
 Version 3.2.1
   - Implemented `default` field.

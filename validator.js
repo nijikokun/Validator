@@ -13,10 +13,28 @@ var Validator = function (schema, middleware) {
   if (middleware) return this.middleware;
 };
 
+Validator.index = function index(obj,is, value) {
+  if (typeof is == 'string')
+    return index(obj,is.split('.'), value);
+  else if (is.length==1 && value!==undefined)
+    return obj[is[0]] = value;
+  else if (is.length==0)
+    return obj;
+  else
+    return index(obj[is[0]],is.slice(1), value);
+}
 // Plugin System
 Validator.plugins = {};
+Validator.plugins._objects = [];
 
-Validator.implement = function (field, callback) {
+Validator.implement = function (field, isObject, callback) {
+  if (typeof isObject === 'function')
+    callback = isObject,
+    isObject = false;
+
+  if (isObject)
+    Validator.plugins._objects.push(field);
+
   Validator.plugins[field] = function (details, key, data) {
     var $this = this
       , option = { 
@@ -31,6 +49,8 @@ Validator.implement = function (field, callback) {
           type = undefined;
 
         $this.error(key, type || field, message, option);
+
+        return $this.errors;
       }
     };
 
@@ -69,14 +89,16 @@ Validator.prototype.param = function (key) {
 // Gathers all sent data either through a request, or given explicitly,
 // for fields that exist inside of the current schema.
 Validator.prototype.roundup = function () {
+  var scheme;
+
   return this.loop(function (key, data) {
-    if (this.schema[key]) {
+    if (scheme = this.schema[key]) {
       if (data = this.param(key))
         this.retrieved[key] = data;
-      else if (this.schema[key].required && typeof this.schema[key].default === 'undefined')
+      else if (scheme.required && typeof scheme.default === 'undefined')
         this.error(key, "required", "This parameter is required.");
-      else if (typeof this.schema[key].default !== 'undefined')
-        this.retrieved[key] = this.schema[key].default;
+      else if (typeof scheme.default !== 'undefined')
+        this.retrieved[key] = scheme.default;
     }
   });
 };
@@ -87,16 +109,42 @@ Validator.prototype.validate = function () {
   // Check for errors after initial fetching.
   if (this.roundup()) return this.errors;
 
-  // Loop through validations for each key
-  if (this.loop(function (key, data) {
-    var details = this.schema[key];
-    var fields = Object.keys(details), field, i = 0;
+  // There has to be a better way to do nesting with default checks.
+  function loop (fields, details, key, data, deep) {
+    var i = 0, field;
 
-    for (i; i < fields.length; i++)
-      if (field = fields[i])
-        if (Validator.plugins[field])
+    fields.sort(function (a, b) {
+      return (a === 'required') ? 0 : 1;
+    });
+
+    for (i; i < fields.length; i++) {
+      if (field = fields[i].toLowerCase()) {
+        if (deep && field === 'required' || field === 'default') {
+          if (field === 'required' && typeof details.default === 'undefined' && !data) {
+            return this.error(key, "required", "This parameter is required.");
+          } else if (field === 'default' && typeof details.default !== 'undefined') {
+            Validator.index(this.retrieved, deep, details.default);
+            data = details.default;
+          }
+
+          continue;
+        }
+
+        if (Validator.plugins[field]) {
           if (Validator.plugins[field].call(this, details, key, data))
             return this.errors;
+        } else if (Object.prototype.toString.call(this.schema[key][field]) == "[object Object]" && Validator.plugins._objects.indexOf(field) == -1) {
+          if (loop.call(this, Object.keys(this.schema[key][field]), this.schema[key][field], field, this.retrieved[key][field], key + "." + field))
+            return this.errors;
+        }
+      }
+    }
+  }
+
+  // Loop through validations for each key
+  if (this.loop(function (key, data) {
+    var details = this.schema[key], fields = Object.keys(details);
+    return loop.call(this, fields, details, key, data);
   })) return this.errors;
   
   // Return retrieved data
@@ -110,7 +158,7 @@ Validator.prototype.error = function (key, type, message, option) {
   this.errors[key][type] = { message: message };
 
   if (option && this.debug && typeof option.data !== "undefined")
-    this.errors[key][type].value = option.data;
+    this.errors[key][type].value = typeof option.data === 'object' ? JSON.stringify(option.data) : option.data;
 };
 
 Validator.prototype.checkErrors = function () {
@@ -160,7 +208,7 @@ Validator.implement("type", function (options) {
 //
 // Checks given data length against a numerical value, when the field is an object we check against
 // the `min` and `max` values. If the field is simply a numeric value we check for equality.
-Validator.implement("length", function (options) {
+Validator.implement("length", true, function (options) {
   if (typeof options.data === "undefined") return;
 
   // Check whether length exists, otherwise use value

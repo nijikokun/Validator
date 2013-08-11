@@ -5,15 +5,29 @@
 var Validator = require('./validator');
 
 var schema = {
-  id: {
-    type: Number,
-    default: 1,
-    length: {
-      min: 1,
-      max: 200
+  backpack: {
+    type: Object,
+    required: true,
+
+    team: {
+      type: Array,
+      required: true,
+      length: {
+        min: 1,
+        max: 6
+      }
+    },
+
+    inventory: {
+      type: Array,
+      default: [],
+      length: {
+        max: 255
+      }
     }
   },
-  username: {
+
+  name: {
     type: "String",
     required: true,
     length: {
@@ -21,10 +35,6 @@ var schema = {
       max: 36
     },
     test: /^[a-z0-9]+$/i
-  },
-  password: {
-    type: String,
-    required: true
   }
 };
 
@@ -43,7 +53,7 @@ var route = function (req, res) {
   // Turn on values in error messages
   validator.debug = true;
 
-  console.log(req.param('message'), validator.check(req.param('user')));
+  console.log(req.param('message'), validator.check(req.param('trainer')));
 };
 
 // Impersonate requests
@@ -52,29 +62,33 @@ var route = function (req, res) {
 // Shows defaults, and validation checks.
 route(new system({
   message: 'Defaults:',
-  user: {
-    username: 'Nijikokun',
-    password: 'password'
+  trainer: {
+    backpack: { 
+      team: [ 'Bulbasaur' ] 
+    },
+    name: 'Nijikokun'
   }
 }));
 
 // This should not pass due to invalid identifier (just to show number length yadda yadda)
 route(new system({
   message: 'Length:',
-  user: {
-    id: -25,
-    username: 'Nijikokun',
-    password: 'password'
+  trainer: {
+    backpack: { 
+      team: [ 'Bulbasaur', 'Charmander', 'Squirtle', 'Pidgey', 'Pikachu', 'Nidosaur', 'Mew' ] 
+    },
+    name: 'Nijikokun'
   }
 }));
 
 // This should not pass due to invalid name
 route(new system({
   message: 'Test:',
-  user: {
-    id: 1,
-    username: 'Niji%kokun',
-    password: 'password'
+  trainer: {
+    backpack: { 
+      team: [ 'Bulbasaur' ] 
+    },
+    name: 'Nijik^kun'
   }
 }));
 
@@ -82,8 +96,9 @@ route(new system({
 // Missing values are checked first, so they proceed all other checks.
 route(new system({
   message: 'Required:',
-  user: {
-    id: 1,
-    username: 'Niji%kokun'
+  trainer: {
+    backpack: { 
+      team: [ 'Bulbasaur' ] 
+    }
   }
 }));
