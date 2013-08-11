@@ -73,8 +73,10 @@ Validator.prototype.roundup = function () {
     if (this.schema[key]) {
       if (data = this.param(key))
         this.retrieved[key] = data;
-      else if (this.schema[key].required)
+      else if (this.schema[key].required && typeof this.schema[key].default === 'undefined')
         this.error(key, "required", "This parameter is required.");
+      else if (typeof this.schema[key].default !== 'undefined')
+        this.retrieved[key] = this.schema[key].default;
     }
   });
 };

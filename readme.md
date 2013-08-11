@@ -116,14 +116,19 @@ After your implementation has been ran, the validator will check for errors, if 
 - ~~Make extensibility easier.~~
 - ~~Move over to github repository.~~
 - ~~Make implementations use an object as an argument rather than multiple arguments.~~
+- Implement nesting feature. Might be useful, I personally can't see one... let me know in issues if you can.
 - Break up implementations into their own folder and make a compiler.
 
 Futuristic / Unfeasible
-- Find a way to show how to do unique without requiring hassle of setup.
+- Find a way to show how to do unique without requiring hassle of setup. (JuggleDB?)
   - Essentially you connect in your database and get the collection and check against the key.
   - It's not that hard but there are thousands of databases and ways people do things...
 
 ### Changelog
+
+Version 3.2.1
+  - Implemented `default` field.
+    - Supported even on `required` fields, may be subject to change. Let me know in issues how you feel.
 
 Version 3.2
   - Fixed test, now can be run with node

@@ -1,6 +1,6 @@
 {
   "name": "schema-validator",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "description": "JSON Schema validation library for JavaScript / Node / Express.",
   "main": "validator.js",
   "scripts": {
