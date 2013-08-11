@@ -12,7 +12,9 @@ For browsers, download and include the script `validator.js` just as you would j
 
 ### Implementations
 
-- Requirement (built-in)
+- Required (built-in)
+- Default (built-in) - is done during required check, and is placed even if required exists.
+  - This functionality is subject to change (placed even if required part). Let me know in issues.
 - Type - uses `Object.prototype.toString.call` so make sure you use `String`, `Number`, `Boolean`... etc.
 - Length - By itself it must be this long, otherwise as an object supports the following:
   - Min
