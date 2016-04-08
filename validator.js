@@ -294,7 +294,7 @@ Validator.implement("test", function (options) {
     }
   } else {
     if (!options.value.test(options.data)) {
-      options.error("Parameter data did not pass regex test.")
+      options.error("Parameter data did not pass regex test:", options.value.test)
     }
   }
 })
