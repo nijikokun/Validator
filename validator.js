@@ -117,10 +117,10 @@ Validator.prototype.roundup = function () {
 
       if (typeof data !== 'undefined') {
         this.retrieved[key] = data
-      } else if (scheme.required && typeof scheme.default === 'undefined') {
+      } else if (scheme.required && typeof scheme['default'] === 'undefined') {
         this.error(key, "required", "This parameter is required.")
-      } else if (typeof scheme.default !== 'undefined') {
-        this.retrieved[key] = scheme.default
+      } else if (typeof scheme['default'] !== 'undefined') {
+        this.retrieved[key] = scheme['default']
       }
     }
   });
@@ -146,11 +146,11 @@ Validator.prototype.validate = function () {
     for (i; i < fields.length; i++) {
       if (field = fields[i].toLowerCase()) {
         if (deep && field === 'required' || field === 'default') {
-          if (field === 'required' && typeof details.default === 'undefined' && !data) {
+          if (field === 'required' && typeof details['default'] === 'undefined' && !data) {
             return this.error(key, "required", "This parameter is required.")
-          } else if (field === 'default' && typeof details.default !== 'undefined') {
-            Validator.index(this.retrieved, deep, details.default)
-            data = details.default
+          } else if (field === 'default' && typeof details['default'] !== 'undefined') {
+            Validator.index(this.retrieved, deep, details['default'])
+            data = details['default']
           }
 
           continue;
