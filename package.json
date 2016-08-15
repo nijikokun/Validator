@@ -4,7 +4,7 @@
   "description": "JSON Schema validation library for JavaScript / Node / Express.",
   "main": "validator.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node test.js"
   },
   "repository": {
     "type": "git",
