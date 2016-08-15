@@ -30,7 +30,7 @@ var schema = {
   },
 
   name: {
-    type: "String",
+    type: 'String',
     required: true,
     length: {
       min: 3,
@@ -40,7 +40,7 @@ var schema = {
   },
 
   password: {
-    type: "String"
+    type: 'String'
   }
 }
 
@@ -58,10 +58,19 @@ assert(validator.check({
   password: ''
 })._error == null)
 
-// This should not pass due to invalid identifier (just to show number length yadda yadda)
+// This should not pass due to invalid identifier (just to show number length
+// yadda yadda)
 assert(validator.check({
   backpack: {
-    team: [ 'Bulbasaur', 'Charmander', 'Squirtle', 'Pidgey', 'Pikachu', 'Nidosaur', 'Mew' ]
+    team: [
+      'Bulbasaur',
+      'Charmander',
+      'Squirtle',
+      'Pidgey',
+      'Pikachu',
+      'Nidosaur',
+      'Mew'
+    ]
   },
   name: 'Nijikokun',
   password: ''
