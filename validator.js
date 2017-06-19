@@ -145,7 +145,7 @@ Validator.prototype.validate = function () {
 
     for (i; i < fields.length; i++) {
       if (field = fields[i].toLowerCase()) {
-        if(field === "required" && data === undefined && details['required'] === false){
+        if(field === "required" && (data === undefined || data === null) && details['required'] === false){
           return this.errors;
         }
         if (deep && field === 'required' || field === 'default') {
