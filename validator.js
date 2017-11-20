@@ -285,6 +285,7 @@ Validator.implement("length", true, function (options) {
 //
 // Checks given data against a single `RegExp` using `.test` or an `Array` of `RegExp` using `.test`
 Validator.implement("test", function (options) {
+  options.value = eval(options.value||'');
   if (Object.prototype.toString.call(options.value) === "[object Array]") {
     var i = 0
     var regex
@@ -296,7 +297,7 @@ Validator.implement("test", function (options) {
     }
   } else {
     if (!options.value.test(options.data)) {
-      options.error("Parameter data did not pass regex test.")
+      options.error("Parameter data did not pass regex test:", options.value)
     }
   }
 })
